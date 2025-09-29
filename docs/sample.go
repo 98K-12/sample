@@ -11,13 +11,13 @@ import (
 )
 
 var flg_click, flg_move int8
-var Acc float64 = 0.0               //加速度
 var x float64 = 540.0               //初期X座標
 var y float64 = 500.0               //初期Y座標
 var x_1st, y_1st float64 = 0.0, 0.0 //マウスが初めにクリックされたX,Y座標
-var Rad float64 = 0.0               //ラジアン
+var Rad float64 = -1.4              //ラジアン
+var Rad_pre float64 = 0.0           //ラジアン前回値
 var dx, dy float64 = 0.0, 0.0       //sin, cos値
-var Speed float64 = 3.0
+var Speed float64 = 5.0
 
 type game struct {
 	img *ebiten.Image
@@ -45,12 +45,15 @@ func (g *game) Draw(screen *ebiten.Image) {
 	// 画像のOption定義
 	op := &ebiten.DrawImageOptions{}
 
+	// クリック位置保存
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 		Cur1stx, Cur1sty := ebiten.CursorPosition()
 		x_1st = float64(Cur1stx)
 		y_1st = float64(Cur1sty)
+		Speed = 5.0
 	}
 
+	//ボタンを押している間
 	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
 		flg_click = 1
 		// 画像の回転
@@ -59,6 +62,12 @@ func (g *game) Draw(screen *ebiten.Image) {
 		op.GeoM.Translate(-float64(bounds.Dx())/2, -float64(bounds.Dy())/2)
 		Curx, Cury := ebiten.CursorPosition()
 		Rad = math.Atan2((y_1st - float64(Cury)), (x_1st - float64(Curx)))
+
+		// クリック時の回転方向前回値更新
+		if Rad == 0 {
+			Rad = Rad_pre
+		}
+
 		op.GeoM.Rotate(Rad)
 
 		// 画像とクリック位置の2点間の距離
@@ -67,7 +76,7 @@ func (g *game) Draw(screen *ebiten.Image) {
 		// 画像描画
 		op.GeoM.Translate(x, y)
 		screen.DrawImage(g.img, op)
-	} else {
+	} else { //ボタンを離しているとき
 		if flg_click == 1 {
 			flg_move = 1
 			flg_click = 0
@@ -79,17 +88,32 @@ func (g *game) Draw(screen *ebiten.Image) {
 			dx = math.Cos(Rad)
 			dy = math.Sin(Rad)
 
+			Speed += 0.3
+
 			x = x + dx*Speed
 			y = y + dy*Speed
 		}
+		Rad_pre = Rad
 		op.GeoM.Rotate(Rad)
 		op.GeoM.Translate(x, y)
 		screen.DrawImage(g.img, op)
 	}
 
-	//vy += 1.0 // 速度に加速度を足す（重力）
-	//y += vy   // 位置に速度を足す
+	if x < 0 {
+		flg_move = 0
+		x = 0
+	} else if 1280 < x {
+		flg_move = 0
+		x = 1280
+	}
 
+	if y < 0 {
+		flg_move = 0
+		y = 0
+	} else if 720 < y {
+		flg_move = 0
+		y = 720
+	}
 	var deg = Rad * 180 / math.Pi
 	s := fmt.Sprintln(Rad, x, y, dx, dy, deg)
 	ebitenutil.DebugPrint(screen, s)

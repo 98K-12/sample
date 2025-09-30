@@ -11,7 +11,7 @@ import (
 )
 
 var flg_click, flg_move int8
-var x float64 = 540.0               //初期X座標
+var x float64 = 300.0               //初期X座標
 var y float64 = 500.0               //初期Y座標
 var x_1st, y_1st float64 = 0.0, 0.0 //マウスが初めにクリックされたX,Y座標
 var Rad float64 = -1.4              //ラジアン
@@ -141,9 +141,9 @@ func (g *game) Draw(screen *ebiten.Image) {
 	if x < 0 {
 		flg_move = 0
 		x = 0
-	} else if 1280 < x {
+	} else if 640 < x {
 		flg_move = 0
-		x = 1280
+		x = 640
 	}
 
 	if y < 0 {
@@ -165,7 +165,7 @@ func (g *game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 
 func main() {
 	ebiten.SetWindowTitle("sample")
-	ebiten.SetWindowSize(1280, 720)
+	ebiten.SetWindowSize(640, 720)
 	g, err := newGame()
 	if err != nil {
 		panic(err)

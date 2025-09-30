@@ -19,6 +19,8 @@ var Rad_pre float64 = 0.0           //ラジアン前回値
 var dx, dy float64 = 0.0, 0.0       //sin, cos値
 var Speed float64 = 5.0
 
+var flg_touch int8 = 0
+
 type game struct {
 	img *ebiten.Image
 }
@@ -45,6 +47,9 @@ func (g *game) Draw(screen *ebiten.Image) {
 	// 画像のOption定義
 	op := &ebiten.DrawImageOptions{}
 
+	//タッチ判定用
+	touchIDs := ebiten.AppendTouchIDs(nil)
+
 	// クリック位置保存
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 		Cur1stx, Cur1sty := ebiten.CursorPosition()
@@ -52,8 +57,13 @@ func (g *game) Draw(screen *ebiten.Image) {
 		y_1st = float64(Cur1sty)
 	}
 
-	//タッチ入力
-	touchIDs := ebiten.AppendTouchIDs(nil)
+	if flg_touch == 0 {
+		if len(touchIDs) != 0 {
+			Cur1stx, Cur1sty := ebiten.TouchPosition(touchIDs[0])
+			x_1st = float64(Cur1stx)
+			y_1st = float64(Cur1sty)
+		}
+	}
 
 	//ボタンを押している間
 	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
@@ -80,6 +90,7 @@ func (g *game) Draw(screen *ebiten.Image) {
 		op.GeoM.Translate(x, y)
 		screen.DrawImage(g.img, op)
 	} else if len(touchIDs) != 0 {
+		flg_touch = 1
 		flg_click = 1
 		Speed = 5.0
 		// 画像の回転
@@ -107,6 +118,8 @@ func (g *game) Draw(screen *ebiten.Image) {
 			flg_move = 1
 			flg_click = 0
 		}
+		flg_touch = 0
+
 		bounds := g.img.Bounds()
 		op.GeoM.Translate(-float64(bounds.Dx())/2, -float64(bounds.Dy())/2)
 

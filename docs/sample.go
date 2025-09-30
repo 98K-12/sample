@@ -53,7 +53,53 @@ func (g *game) Draw(screen *ebiten.Image) {
 		Speed = 5.0
 	}
 
+	//タッチ入力
 	touchIDs := ebiten.AppendTouchIDs(nil)
+	//タッチしている間
+	if len(touchIDs) != 0 {
+		flg_click = 1
+		// 画像の回転
+		// タッチしている間画像の中心点とタッチ位置の2点を結ぶ直線方向に回転
+		bounds := g.img.Bounds()
+		op.GeoM.Translate(-float64(bounds.Dx())/2, -float64(bounds.Dy())/2)
+		Curx, Cury := ebiten.TouchPosition(touchIDs[0])
+		Rad = math.Atan2((y_1st - float64(Cury)), (x_1st - float64(Curx)))
+
+		// タッチ時の回転方向前回値更新
+		if Rad == 0 {
+			Rad = Rad_pre
+		}
+
+		op.GeoM.Rotate(Rad)
+
+		// 画像とタッチ位置の2点間の距離
+		//d = math.Sqrt((x-float64(dx))*(x-float64(dx)) + (y-float64(dy))*(y-float64(dy)))
+
+		// 画像描画
+		op.GeoM.Translate(x, y)
+		screen.DrawImage(g.img, op)
+	} else { //タッチしていないとき
+		if flg_click == 1 {
+			flg_move = 1
+			flg_click = 0
+		}
+		bounds := g.img.Bounds()
+		op.GeoM.Translate(-float64(bounds.Dx())/2, -float64(bounds.Dy())/2)
+
+		if flg_move == 1 {
+			dx = math.Cos(Rad)
+			dy = math.Sin(Rad)
+
+			Speed += 0.3
+
+			x = x + dx*Speed
+			y = y + dy*Speed
+		}
+		Rad_pre = Rad
+		op.GeoM.Rotate(Rad)
+		op.GeoM.Translate(x, y)
+		screen.DrawImage(g.img, op)
+	}
 
 	//ボタンを押している間
 	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {

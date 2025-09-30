@@ -53,6 +53,8 @@ func (g *game) Draw(screen *ebiten.Image) {
 		Speed = 5.0
 	}
 
+	touchIDs := ebiten.AppendTouchIDs(nil)
+
 	//ボタンを押している間
 	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
 		flg_click = 1
@@ -114,8 +116,9 @@ func (g *game) Draw(screen *ebiten.Image) {
 		flg_move = 0
 		y = 720
 	}
+
 	var deg = Rad * 180 / math.Pi
-	s := fmt.Sprintln(Rad, x, y, dx, dy, deg)
+	s := fmt.Sprintln(Rad, x, y, dx, dy, deg, touchIDs)
 	ebitenutil.DebugPrint(screen, s)
 }
 

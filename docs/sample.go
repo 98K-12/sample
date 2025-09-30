@@ -50,7 +50,6 @@ func (g *game) Draw(screen *ebiten.Image) {
 		Cur1stx, Cur1sty := ebiten.CursorPosition()
 		x_1st = float64(Cur1stx)
 		y_1st = float64(Cur1sty)
-		Speed = 5.0
 	}
 
 	//タッチ入力
@@ -59,6 +58,7 @@ func (g *game) Draw(screen *ebiten.Image) {
 	//ボタンを押している間
 	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
 		flg_click = 1
+		Speed = 5.0
 		// 画像の回転
 		// クリックしている間画像の中心点とクリック位置の2点を結ぶ直線方向に回転
 		bounds := g.img.Bounds()
@@ -81,6 +81,7 @@ func (g *game) Draw(screen *ebiten.Image) {
 		screen.DrawImage(g.img, op)
 	} else if len(touchIDs) != 0 {
 		flg_click = 1
+		Speed = 5.0
 		// 画像の回転
 		// タッチしている間画像の中心点とタッチ位置の2点を結ぶ直線方向に回転
 		bounds := g.img.Bounds()

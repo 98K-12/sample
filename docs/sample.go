@@ -2,12 +2,14 @@ package main
 
 import (
 	"fmt"
+	"image/color"
 	_ "image/png"
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
 var flg_click, flg_move int8
@@ -53,7 +55,6 @@ func (g *game) Draw(screen *ebiten.Image) {
 
 	// 画像のOption定義
 	op := &ebiten.DrawImageOptions{}
-	op2 := &ebiten.DrawImageOptions{}
 
 	//タッチ判定用
 	touchIDs := ebiten.AppendTouchIDs(nil)
@@ -80,9 +81,7 @@ func (g *game) Draw(screen *ebiten.Image) {
 		// 画像の回転
 		// クリックしている間画像の中心点とクリック位置の2点を結ぶ直線方向に回転
 		bounds := g.img.Bounds()
-		bounds2 := g.lineimg.Bounds()
 		op.GeoM.Translate(-float64(bounds.Dx())/2, -float64(bounds.Dy())/2)
-		op2.GeoM.Translate(-float64(bounds2.Dx())/2, -float64(bounds2.Dy())/2)
 		Curx, Cury := ebiten.CursorPosition()
 		Rad = math.Atan2((y_1st - float64(Cury)), (x_1st - float64(Curx)))
 
@@ -92,16 +91,14 @@ func (g *game) Draw(screen *ebiten.Image) {
 		}
 
 		op.GeoM.Rotate(Rad)
-		op2.GeoM.Rotate(Rad)
 
 		// 画像とクリック位置の2点間の距離
 		//d = math.Sqrt((x-float64(dx))*(x-float64(dx)) + (y-float64(dy))*(y-float64(dy)))
 
 		// 画像描画
-		op2.GeoM.Translate(x, y)
-		screen.DrawImage(g.lineimg, op2)
 		op.GeoM.Translate(x, y)
 		screen.DrawImage(g.img, op)
+		vector.StrokeLine(screen, float32(x_1st), float32(y_1st), float32(Curx), float32(Cury), 1, color.RGBA{0xff, 0xff, 0xff, 0xff}, true)
 
 	} else if len(touchIDs) != 0 {
 		flg_touch = 1
@@ -110,9 +107,7 @@ func (g *game) Draw(screen *ebiten.Image) {
 		// 画像の回転
 		// タッチしている間画像の中心点とタッチ位置の2点を結ぶ直線方向に回転
 		bounds := g.img.Bounds()
-		bounds2 := g.lineimg.Bounds()
 		op.GeoM.Translate(-float64(bounds.Dx())/2, -float64(bounds.Dy())/2)
-		op2.GeoM.Translate(-float64(bounds2.Dx())/2, -float64(bounds2.Dy())/2)
 		Curx, Cury := ebiten.TouchPosition(touchIDs[0])
 		Rad = math.Atan2((y_1st - float64(Cury)), (x_1st - float64(Curx)))
 
@@ -122,14 +117,11 @@ func (g *game) Draw(screen *ebiten.Image) {
 		}
 
 		op.GeoM.Rotate(Rad)
-		op2.GeoM.Rotate(Rad)
 
 		// 画像とタッチ位置の2点間の距離
 		//d = math.Sqrt((x-float64(dx))*(x-float64(dx)) + (y-float64(dy))*(y-float64(dy)))
 
 		// 画像描画
-		op2.GeoM.Translate(x, y)
-		screen.DrawImage(g.lineimg, op2)
 		op.GeoM.Translate(x, y)
 		screen.DrawImage(g.img, op)
 	} else { //ボタンを離しているとき
